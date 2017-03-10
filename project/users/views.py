@@ -17,7 +17,7 @@ def authenticate(username, password):
 def jwt_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        from IPython import embed; embed()
+        # from IPython import embed; embed()
         if request.headers.get('authorization'):
             split_token = request.headers.get('authorization').split(' ')[1]
         try:
