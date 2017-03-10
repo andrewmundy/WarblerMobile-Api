@@ -17,7 +17,7 @@ def authenticate(username, password):
 def jwt_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        # from IPython import embed; embed()
+        from IPython import embed; embed()
         if request.headers.get('authorization'):
             split_token = request.headers.get('authorization').split(' ')[1]
         try:
@@ -82,10 +82,13 @@ class usersAPI(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, help='username')
         parser.add_argument('password', type=str, help='password')
+        parser.add_argument('email', type=str, help='email')
+        parser.add_argument('image_url', type=str, help='image_url')
         args = parser.parse_args()
+        from IPython import embed; embed()
 
         try:
-            new_user = User(args['username'], args['password'])
+            new_user = User(username=args['username'], password=args['password'], email=args['email'], image_url=args['image_url'])
             db.session.add(new_user)
             db.session.commit()
         except IntegrityError as e:
