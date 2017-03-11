@@ -18,8 +18,8 @@ def authenticate(username, password):
 def jwt_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        if request.headers.get('authorization'):
-            split_token = request.headers.get('token').split(' ')[2]
+        if request.headers.get('Authorization'):
+            split_token = request.headers.get('Authorization').split(' ')[1]
         try:
             token = jwt.decode(split_token, 'secret', algorithm='HS256')
             if token:
@@ -35,7 +35,7 @@ def ensure_correct_user(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         if request.headers.get('token'):
-            split_token = request.headers.get('token').split(' ')[2]
+            split_token = request.headers.get('token').split(' ')[1]
         try:
             token = jwt.decode(split_token, 'secret', algorithm='HS256')
             if kwargs.get('id') == token.get('id'):
@@ -55,6 +55,8 @@ user_messages_fields = {
 user_fields= {
     'id': fields.Integer,
     'username': fields.String,
+    'email': fields.String,
+    'image_url': fields.String,
     'messages': fields.Nested(user_messages_fields),
 }
 
@@ -83,7 +85,6 @@ class authAPI(Resource):
 
 @users_api.resource('/users')
 class usersAPI(Resource):
-
     @jwt_required
     @marshal_with(user_fields)
     def get(self):
@@ -95,13 +96,15 @@ class usersAPI(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, help='username')
         parser.add_argument('password', type=str, help='password')
+        parser.add_argument('email', type=str, help='email')
+        parser.add_argument('image_url', type=str, help='image_url')
         args = parser.parse_args()
         try:
-            new_user = User(args['username'], args['password'])
+            new_user = User(username=args['username'], password=args['password'], email=args['email'], image_url=args['image_url'])
             db.session.add(new_user)
             db.session.commit()
         except IntegrityError as e:
-            return "Username already exists"
+            return "Username for API already exists"
         return new_user
 
 @users_api.resource('/users/<int:id>')

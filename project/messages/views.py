@@ -38,7 +38,7 @@ def ensure_correct_user(fn):
         return abort(401, "Unauthorized")
     return wrapper
 
-messasges_api = Api(Blueprint('messasges_api', __name__))
+messages_api = Api(Blueprint('messages_api', __name__))
 
 message_user_fields = {
     'id': fields.Integer,
@@ -52,7 +52,7 @@ message_fields= {
     'user': fields.Nested(message_user_fields)
 }
 
-@messasges_api.resource('/messasges')
+@messages_api.resource('/messasges')
 class MessagesAPI(Resource):
 
     @jwt_required
@@ -73,7 +73,7 @@ class MessagesAPI(Resource):
 
         return new_message
 
-@messasges_api.resource('/messasges/<int:id>')
+@messages_api.resource('/messasges/<int:id>')
 class MessageAPI(Resource):
 
     @jwt_required
