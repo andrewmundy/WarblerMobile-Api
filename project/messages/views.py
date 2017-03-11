@@ -7,10 +7,11 @@ from flask_jwt import current_identity
 from functools import wraps
 from jwt.exceptions import DecodeError
 
+messages_api = Api(Blueprint('messages_api', __name__))
+
 def jwt_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        from IPython import embed; embed()
         if request.headers.get('token'):
             split_token = request.headers.get('token').split(' ')[2]
         try:
@@ -38,8 +39,6 @@ def ensure_correct_user(fn):
         return abort(401, "Unauthorized")
     return wrapper
 
-messages_api = Api(Blueprint('messages_api', __name__))
-
 message_user_fields = {
     'id': fields.Integer,
     'username': fields.String,
@@ -52,13 +51,14 @@ message_fields= {
     'user': fields.Nested(message_user_fields)
 }
 
-@messages_api.resource('/messasges')
+
+@messages_api.resource('/messages')
 class MessagesAPI(Resource):
 
     @jwt_required
     @marshal_with(message_fields)
     def get(self, user_id):
-        return User.query.get_or_404(user_id).messasges
+        return User.query.get_or_404(user_id).messages
 
     @jwt_required
     @marshal_with(message_fields)
@@ -70,10 +70,9 @@ class MessagesAPI(Resource):
         db.session.add(new_message)
         db.session.commit()
         print("Adding a message backend")
-
         return new_message
 
-@messages_api.resource('/messasges/<int:id>')
+@messages_api.resource('/messages/<int:id>')
 class MessageAPI(Resource):
 
     @jwt_required
