@@ -39,7 +39,6 @@ def ensure_correct_user(fn):
         return abort(401, "Unauthorized")
     return wrapper
 
-
 message_user_fields = {
     'id': fields.Integer,
     'username': fields.String,
@@ -51,6 +50,7 @@ message_fields= {
     'created': fields.DateTime(dt_format='rfc822'),
     'user': fields.Nested(message_user_fields)
 }
+
 
 @messages_api.resource('/messages')
 class MessagesAPI(Resource):
@@ -70,7 +70,6 @@ class MessagesAPI(Resource):
         db.session.add(new_message)
         db.session.commit()
         print("Adding a message backend")
-
         return new_message
 
 @messages_api.resource('/messages/<int:id>')

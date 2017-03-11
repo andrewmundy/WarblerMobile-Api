@@ -35,6 +35,8 @@ def jwt_required(fn):
 def ensure_correct_user(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
+        if request.headers.get('token'):
+            split_token = request.headers.get('token').split(' ')[1]
 
         if request.headers.get('authorization'):
             split_token = request.headers.get('authorization').split(' ')[1]
@@ -91,7 +93,6 @@ class authAPI(Resource):
 
 @users_api.resource('/users')
 class usersAPI(Resource):
-
     @jwt_required
     @marshal_with(user_fields)
     def get(self):
