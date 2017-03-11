@@ -22,7 +22,9 @@ def jwt_required(fn):
             split_token = request.headers.get('authorization').split(' ')[1]
         try:
             token = jwt.decode(split_token, 'secret', algorithm='HS256')
+            # what is 'secret' for? is that a reference?
             if token:
+                # should return GET request on all
                 return fn(*args, **kwargs)
         except DecodeError as e:
             return abort(401, "DecodeError, Please log in again")
@@ -67,6 +69,25 @@ user_fields= {
     'id': fields.Integer,
     'username': fields.String,
 }
+
+
+@users_api.resource('/users/auth')
+class authAPI(Resource):
+
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str, help='username')
+        parser.add_argument('password', type=str, help='password')
+        args = parser.parse_args()
+        token = authenticate(args['username'], args['password'])
+        from IPython import embed; embed()
+        if token:
+            found_user = User.query.filter_by(username= args['username']).first()
+            obj = {'token': token, 'id': found_user.id} 
+            # this looks like where the JWT token is being returned,
+            # and specified to have an id element
+            return obj
+        return abort(400, "Invalid Credentials")
 
 @users_api.resource('/users')
 class usersAPI(Resource):
