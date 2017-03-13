@@ -1,5 +1,5 @@
 from flask import redirect, request, url_for, Blueprint, abort
-from project.models import User
+from project.models import User, Message
 from project import db, bcrypt
 from sqlalchemy.exc import IntegrityError
 from functools import wraps
@@ -55,6 +55,7 @@ users_blueprint = Blueprint(
   template_folder='templates'
 )
 
+# DONT THINK THESE MESG STUFF ARE NEEDED BUT WAIT TO SEE IF ANYTHING BREAKS
 messages_blueprint = Blueprint(
   'messages',
   __name__,
@@ -127,3 +128,52 @@ class userAPI(Resource):
     @marshal_with(user_fields)
     def get(self, id):
         return User.query.get_or_404(id)
+
+
+    @jwt_required
+    @ensure_correct_user
+    @marshal_with(user_fields)
+    def patch(self, id):
+        # do we want PATCH or POST?
+        found_user = User.query.get(id)
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str, help='username')
+        parser.add_argument('password', type=str, help='password')
+        parser.add_argument('email', type=str, help='email')
+        parser.add_argument('image_url', type=str, help='image_url')
+        args = parser.parse_args()
+        # cant use ['key'], user obj not subscriptable?
+        found_user.username = args['username'] or found_user.username
+        found_user.email = args['email'] or found_user.email
+        found_user.image_url = args['image_url'] or found_user.image_url
+        found_user.password = args['password'] or found_user.password
+        db.session.add(found_user)
+        db.session.commit()
+        return found_user
+
+    @jwt_required
+    @ensure_correct_user
+    @marshal_with(user_fields)
+    def delete(self,id):
+        delete_user = User.query.get(id)
+        db.session.delete(delete_user)
+        db.session.commit()
+        return delete_user
+
+    # Move to Messages.views.py
+    @jwt_required
+    @ensure_correct_user
+    @marshal_with(user_fields)
+    def post(self, id):
+        parser = reqparse.RequestParser()
+        parser.add_argument('text', type=str, help='message text')
+        args = parser.parse_args()
+        new_message = Message(user_id=id, text=args['text'])
+        db.session.add(new_message)
+        db.session.commit()
+        print("Adding a message for logged in user")
+        return new_message
+        # why isnt this returning hte msg? is it Marshal With?
+
+
+
