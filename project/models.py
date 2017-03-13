@@ -15,7 +15,6 @@ FollowersFollowee = db.Table('follows',
 
 
 class User(db.Model):
-
   __tablename__ = 'users'
 
   id = db.Column(db.Integer, primary_key=True)
@@ -44,11 +43,7 @@ class User(db.Model):
     return bool(self.following.filter_by(id=user.id).first())
 
 
-
-
-
 class Message(db.Model):
-
   __tablename__ = 'messages'
 
   id = db.Column(db.Integer, primary_key=True)

@@ -45,7 +45,6 @@ def ensure_correct_user(fn):
         return abort(401, "Unauthorized")
     return wrapper
 
-
 message_user_fields = {
     'id': fields.Integer,
     'username': fields.String,
@@ -57,6 +56,7 @@ message_fields= {
     'created': fields.DateTime(dt_format='rfc822'),
     'user': fields.Nested(message_user_fields)
 }
+
 
 @messages_api.resource('/messages')
 class MessagesAPI(Resource):
