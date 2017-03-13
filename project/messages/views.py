@@ -7,6 +7,12 @@ from flask_jwt import current_identity
 from functools import wraps
 from jwt.exceptions import DecodeError
 
+messages_blueprint = Blueprint(
+  'messages',
+  __name__,
+  template_folder='templates'
+)
+
 messages_api = Api(Blueprint('messages_api', __name__))
 
 def jwt_required(fn):
@@ -60,18 +66,24 @@ class MessagesAPI(Resource):
     def get(self, user_id):
         return User.query.get_or_404(user_id).messages
 
+
+        # this should be working but its not
     @jwt_required
-    @marshal_with(message_fields)
-    def post(self, user_id):
+    @ensure_correct_user
+    @marshal_with(message_user_fields)
+    def post(self, id):
+        from IPython import embed; embed()
         parser = reqparse.RequestParser()
-        parser.add_argument('name', type=str, help='Name')
+        parser.add_argument('text', type=str, help='message text')
         args = parser.parse_args()
-        new_message = Message(args['name'], user_id)
+        new_message = Message(user_id=id, text=args['text'])
         db.session.add(new_message)
         db.session.commit()
-        print("Adding a message backend")
-
+        print("Adding a message for logged in user")
         return new_message
+        # why isnt this returning hte msg?
+
+
 
 @messages_api.resource('/messages/<int:id>')
 class MessageAPI(Resource):

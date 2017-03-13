@@ -55,6 +55,7 @@ users_blueprint = Blueprint(
   template_folder='templates'
 )
 
+# DONT THINK THESE MESG STUFF ARE NEEDED BUT WAIT TO SEE IF ANYTHING BREAKS
 messages_blueprint = Blueprint(
   'messages',
   __name__,
@@ -156,6 +157,7 @@ class userAPI(Resource):
         db.session.commit()
         return delete_user
 
+    # Move to Messages.views.py
     @jwt_required
     @ensure_correct_user
     @marshal_with(user_fields)
@@ -166,8 +168,9 @@ class userAPI(Resource):
         new_message = Message(user_id=id, text=args['text'])
         db.session.add(new_message)
         db.session.commit()
+        print("Adding a message for logged in user")
         return new_message
-        # why isnt this returning hte msg?
+        # why isnt this returning hte msg? is it Marshal With?
 
 
 
