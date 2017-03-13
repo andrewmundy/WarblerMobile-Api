@@ -1,5 +1,5 @@
 from flask import redirect, request, url_for, Blueprint, abort
-from project.models import User
+from project.models import User, Message
 from project import db, bcrypt
 from sqlalchemy.exc import IntegrityError
 from functools import wraps
@@ -129,9 +129,8 @@ class userAPI(Resource):
     @jwt_required
     @ensure_correct_user
     @marshal_with(user_fields)
-    def post(self, id):
-        # implmeent need to enter passsword to change
-        # but already have JWT token, so they already did? Necc?
+    def patch(self, id):
+        # do we want PATCH or POST?
         found_user = User.query.get(id)
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, help='username')
@@ -148,6 +147,26 @@ class userAPI(Resource):
         db.session.commit()
         return found_user
 
+    @jwt_required
+    @ensure_correct_user
+    @marshal_with(user_fields)
+    def delete(self,id):
+        delete_user = User.query.get(id)
+        db.session.delete(delete_user)
+        db.session.commit()
+        return delete_user
+
+    @jwt_required
+    @ensure_correct_user
+    @marshal_with(user_fields)
+    def post(self, id):
+        parser = reqparse.RequestParser()
+        parser.add_argument('message', type=str, help='message')
+        args = parser.parse_args()
+        new_message = Message(user_id=id, text=args['text'])
+        db.session.add(new_message)
+        db.session.commit()
+        return new_message
 
 
 

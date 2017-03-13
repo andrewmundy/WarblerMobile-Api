@@ -60,3 +60,6 @@ class Message(db.Model):
     self.text = text
     self.user_id = user_id
     self.timestamp = timestamp
+
+  def __repr__(self):
+    return "Msg Txt: {}, Time Stamp: {}, User ID: {}".format(self.text,self.timestamp,self.user_id)
