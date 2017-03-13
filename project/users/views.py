@@ -161,9 +161,10 @@ class userAPI(Resource):
     @marshal_with(user_fields)
     def post(self, id):
         parser = reqparse.RequestParser()
-        parser.add_argument('message', type=str, help='message')
+        parser.add_argument('text', type=str, help='message text')
         args = parser.parse_args()
         new_message = Message(user_id=id, text=args['text'])
+        from IPython import embed; embed()
         db.session.add(new_message)
         db.session.commit()
         return new_message
