@@ -1,6 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy 
+from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager, current_user
 import os
 from flask import Flask
 app = Flask(__name__)
@@ -14,8 +13,6 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or "Warbler Warbler yay!
 bcrypt = Bcrypt(app)
 db = SQLAlchemy(app)
 
-from project.models import User 
-from project.models import Message 
 from project.users.views import users_api, messages_api
 
 app.register_blueprint(users_api.blueprint, url_prefix='/api')
