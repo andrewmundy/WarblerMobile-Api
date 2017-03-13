@@ -126,5 +126,30 @@ class userAPI(Resource):
     def get(self, id):
         return User.query.get_or_404(id)
 
+    @jwt_required
+    @ensure_correct_user
+    @marshal_with(user_fields)
+    def post(self, id):
+        # implmeent need to enter passsword to change
+        # but already have JWT token, so they already did? Necc?
+        found_user = User.query.get(id)
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str, help='username')
+        parser.add_argument('password', type=str, help='password')
+        parser.add_argument('email', type=str, help='email')
+        parser.add_argument('image_url', type=str, help='image_url')
+        args = parser.parse_args()
+        # cant use ['key'], user obj not subscriptable?
+        found_user.username = args['username'] or found_user.username
+        found_user.email = args['email'] or found_user.email
+        found_user.image_url = args['image_url'] or found_user.image_url
+        found_user.password = args['password'] or found_user.password
+        db.session.add(found_user)
+        db.session.commit()
+        return found_user
+
+
+
+
 
 
