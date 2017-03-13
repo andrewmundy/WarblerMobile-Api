@@ -46,22 +46,50 @@ class BaseTestCase(TestCase):
             'username': 'jrob',
             'image_url': '#',
             'email': 'j@rob.edu',
-            'messages': {'id': 0, 'name': None, 'created': None}
+            'messages': {'id': 0, 'message': None, 'created': None}
         }, {
             'id': 2,
             'username': 'mundefined',
             'image_url': 'http://static.djbooth.net/pics-features/jaden-smith.jpg',
             'email': 'andrew@mundy.gov',
-            'messages': {'id': 0, 'name': None, 'created': None}
+            'messages': {'id': 0, 'message': None, 'created': None}
         }, {
             'id': 3,
             'username': 'aa-ron',
             'image_url': 'https://pbs.twimg.com/profile_images/805534047002705925/TDWxrUN8_400x400.jpg',
             'email': 'aaron@manley.com',
-            'messages': {'id': 0, 'name': None, 'created': None}
+            'messages': {'id': 0, 'message': None, 'created': None}
         }]
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json, expect_json)
+
+    def test_signup(self):
+        response = self.client.post('/api/users', content_type='application/json',
+        data=json.dumps({
+            'username': 'michelle',
+            'password': 'branch',
+            'email': 'michelle@branch.gov',
+            'image_url': None
+        }))
+        expect_json = {
+            'id': 4,
+            'username': 'michelle',
+            'email': 'michelle@branch.gov',
+            'image_url': None,
+            'messages': {'id': 0, 'message': None, 'created': None}
+        }
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(str(response.json), str(expect_json))
+
+    # def test_auth(self):
+    #     response = self.client.post('api/users/auth', content_type='application/json',
+    #     data=json.dumps({
+    #         'username': 'jrob',
+    #         'password': 'pass1'
+    #     }))
+    #     expect_json = {authenticate('jrob', 'pass1')}
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertEqual(response.json, {'token'})
 
 if __name__ == '__main__':
     unittest.main()

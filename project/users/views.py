@@ -37,7 +37,6 @@ def ensure_correct_user(fn):
     def wrapper(*args, **kwargs):
         if request.headers.get('token'):
             split_token = request.headers.get('token').split(' ')[1]
-
         if request.headers.get('authorization'):
             split_token = request.headers.get('authorization').split(' ')[1]
         try:
@@ -50,7 +49,6 @@ def ensure_correct_user(fn):
     return wrapper
 
 # CPed over code
-
 users_blueprint = Blueprint(
   'users',
   __name__,
@@ -66,13 +64,19 @@ messages_blueprint = Blueprint(
 users_api = Api(Blueprint('users_api', __name__))
 messages_api = Api(Blueprint('messages_api', __name__))
 
-user_fields= {
+messages_fields = {
+    'id': fields.Integer,
+    'message': fields.String,
+    'created': fields.String
+}
+
+user_fields = {
     'id': fields.Integer,
     'username': fields.String,
     'email': fields.String,
-    'image_url':fields.String
+    'image_url': fields.String,
+    'messages': fields.Nested(messages_fields),
 }
-
 
 @users_api.resource('/users/auth')
 class authAPI(Resource):
@@ -85,7 +89,7 @@ class authAPI(Resource):
         token = authenticate(args['username'], args['password'])
         if token:
             found_user = User.query.filter_by(username= args['username']).first()
-            obj = {'token': token, 'id': found_user.id} 
+            obj = {'token': token, 'id': found_user.id}
             # this looks like where the JWT token is being returned,
             # and specified to have an id element
             return obj
@@ -93,23 +97,20 @@ class authAPI(Resource):
 
 @users_api.resource('/users')
 class usersAPI(Resource):
+
     @jwt_required
     @marshal_with(user_fields)
     def get(self):
         return User.query.all()
 
-
     @marshal_with(user_fields)
     def post(self):
-
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, help='username')
         parser.add_argument('password', type=str, help='password')
         parser.add_argument('email', type=str, help='email')
         parser.add_argument('image_url', type=str, help='image_url')
         args = parser.parse_args()
-
-
         try:
             new_user = User(username=args['username'], password=args['password'], email=args['email'], image_url=args['image_url'])
             db.session.add(new_user)
@@ -126,6 +127,3 @@ class userAPI(Resource):
     @marshal_with(user_fields)
     def get(self, id):
         return User.query.get_or_404(id)
-
-
-
